@@ -215,16 +215,10 @@ public class LibraryService {
             throw new IllegalArgumentException("Book not found.");
         }
 
-        for (Loan loan : loans) {
-            if (loan.getBookIsbn().equalsIgnoreCase(isbn.trim())) {
-                throw new IllegalStateException(
-                        "Cannot delete a book with loan history.");
-            }
-        }
-
-        if (book.getAvailableCopies() != book.getTotalCopies()) {
+        if (loans.stream().anyMatch(
+                loan -> loan.getBookIsbn().equalsIgnoreCase(isbn.trim()))) {
             throw new IllegalStateException(
-                    "Cannot delete a book that has active loans.");
+                    "Cannot delete a book with loan history.");
         }
 
         int index = books.indexOf(book);
@@ -263,12 +257,6 @@ public class LibraryService {
         String oldFullName = member.getFullname();
         String oldContactNumber = member.getContactNumber();
         MemberStatus oldStatus = member.getStatus();
-        if (status == MemberStatus.ARCHIVED
-                && oldStatus != MemberStatus.ARCHIVED
-                && hasActiveLoans(memberId)) {
-            throw new IllegalStateException(
-                    "A member with active loans cannot be archived.");
-        }
 
         try {
             member.setFullname(fullName);
@@ -279,53 +267,6 @@ public class LibraryService {
             member.setFullname(oldFullName);
             member.setContactNumber(oldContactNumber);
             member.setStatus(oldStatus);
-            throw exception;
-        }
-        notifyDataChanged();
-    }
-
-    public void archiveBook(String isbn) {
-        Book book = findBookByIsbn(isbn);
-        if (book == null) {
-            throw new IllegalArgumentException("Book not found.");
-        }
-        if (book.isArchived()) {
-            return;
-        }
-        if (book.getAvailableCopies() != book.getTotalCopies()) {
-            throw new IllegalStateException(
-                    "A book with active loans cannot be archived.");
-        }
-
-        book.setArchived(true);
-        try {
-            saveAllData();
-        } catch (RuntimeException exception) {
-            book.setArchived(false);
-            throw exception;
-        }
-        notifyDataChanged();
-    }
-
-    public void archiveMember(String memberId) {
-        LibraryMember member = findMemberById(memberId);
-        if (member == null) {
-            throw new IllegalArgumentException("Member not found.");
-        }
-        if (member.getStatus() == MemberStatus.ARCHIVED) {
-            return;
-        }
-        if (hasActiveLoans(memberId)) {
-            throw new IllegalStateException(
-                    "A member with active loans cannot be archived.");
-        }
-
-        MemberStatus previousStatus = member.getStatus();
-        member.setStatus(MemberStatus.ARCHIVED);
-        try {
-            saveAllData();
-        } catch (RuntimeException exception) {
-            member.setStatus(previousStatus);
             throw exception;
         }
         notifyDataChanged();
@@ -357,11 +298,6 @@ public class LibraryService {
             throw new IllegalStateException(
                     "Only active members may borrow books.");
         }
-        if (book.isArchived()) {
-            throw new IllegalStateException(
-                    "Archived books cannot be borrowed.");
-        }
-
         // Check book availability
         if (!book.isAvailable()) {
             throw new BookUnavailableException(
@@ -456,16 +392,6 @@ public class LibraryService {
             throw exception;
         }
         notifyDataChanged();
-    }
-
-    private boolean hasActiveLoans(String memberId) {
-        for (Loan loan : loans) {
-            if (loan.getMemberId().equalsIgnoreCase(memberId.trim())
-                    && !loan.isReturned()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Delete a member using their ID
@@ -850,11 +776,6 @@ public class LibraryService {
                                 + " (ISBN: " + book.getIsbn() + "). "
                                 + "Borrowed copies: " + borrowedCopies
                                 + ", active loans: " + activeLoanCount);
-            }
-            if (book.isArchived() && activeLoanCount > 0) {
-                issues.add(
-                        "Archived book ISBN " + book.getIsbn()
-                                + " still has active loans.");
             }
         }
     }

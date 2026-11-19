@@ -601,7 +601,7 @@ public class DashboardPanel extends JPanel {
     private ArrayList<Book> getLowStockBooks() {
         ArrayList<Book> lowStockBooks = new ArrayList<>();
         for (Book book : library.getBooks()) {
-            if (!book.isArchived() && book.getAvailableCopies() <= 1) {
+            if (book.getAvailableCopies() <= 1) {
                 lowStockBooks.add(book);
             }
         }

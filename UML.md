@@ -104,12 +104,10 @@ classDiagram
         -category: String
         -totalCopies: int
         -availableCopies: int
-        -archived: boolean
         +Book(isbn, title, author, category, totalCopies, availableCopies)
         +isAvailable() boolean
         +borrowCopy() void
         +returnCopy() void
-        +setArchived(archived: boolean) void
     }
 
     class BorrowingPolicy {

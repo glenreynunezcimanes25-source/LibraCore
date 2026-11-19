@@ -81,7 +81,7 @@ public class MembersPanel extends JPanel {
         private JComboBox<String> statusFilter;
         private JButton editButton;
         private JButton historyButton;
-        private JButton archiveButton;
+        private JButton deleteButton;
         private JButton previousPageButton;
         private JButton nextPageButton;
         private JLabel pageLabel;
@@ -233,7 +233,7 @@ public class MembersPanel extends JPanel {
                                 new String[] { "All types", "Student", "Faculty" });
                 statusFilter = new JComboBox<>(
                                 new String[] { "All statuses", "Active", "Inactive",
-                                                "Suspended", "Archived" });
+                                                "Suspended" });
                 RoundedComponents.styleComboBox(typeFilter, new Dimension(160, 40));
                 RoundedComponents.styleComboBox(statusFilter, new Dimension(150, 40));
                 typeFilter.setToolTipText("Filter members by type.");
@@ -391,23 +391,23 @@ public class MembersPanel extends JPanel {
                 editButton = createButton("Edit Selected", "save.png", GREEN);
                 historyButton = createButton(
                                 "View History", "history.png", GOLD, DARK);
-                archiveButton = createButton(
-                                "Archive Selected",
+                deleteButton = createButton(
+                                "Delete Selected",
                                 "delete.png",
                                 new Color(198, 91, 88), WHITE);
                 editButton.setPreferredSize(new Dimension(160, 40));
                 historyButton.setPreferredSize(new Dimension(160, 40));
-                archiveButton.setPreferredSize(new Dimension(160, 40));
+                deleteButton.setPreferredSize(new Dimension(160, 40));
 
                 editButton.addActionListener(event -> editMember());
-                archiveButton.addActionListener(event -> deleteMember());
+                deleteButton.addActionListener(event -> deleteMember());
                 historyButton.addActionListener(event -> viewMemberHistory());
                 editButton.setEnabled(false);
                 historyButton.setEnabled(false);
-                archiveButton.setEnabled(false);
+                deleteButton.setEnabled(false);
                 footerActions.add(historyButton);
                 footerActions.add(editButton);
-                footerActions.add(archiveButton);
+                footerActions.add(deleteButton);
 
                 footer.add(paginationPanel, BorderLayout.CENTER);
                 footer.add(footerActions, BorderLayout.SOUTH);
@@ -550,7 +550,7 @@ public class MembersPanel extends JPanel {
 
                 editButton.setEnabled(hasSelection);
                 historyButton.setEnabled(hasSelection);
-                archiveButton.setEnabled(hasSelection);
+                deleteButton.setEnabled(hasSelection);
                 memberDetailsLayout.show(
                                 memberDetailsContent, hasSelection ? "DETAILS" : "EMPTY");
                 if (!hasSelection) {
@@ -979,8 +979,10 @@ public class MembersPanel extends JPanel {
 
                 JComboBox<String> typeBox = new JComboBox<>(
                                 new String[] { "Student", "Faculty" });
-                JComboBox<String> statusBox = new JComboBox<>(
-                                new String[] { "Active", "Inactive", "Suspended", "Archived" });
+                String[] statusOptions = member.getStatus() == MemberStatus.ARCHIVED
+                                ? new String[] { "Active", "Inactive", "Suspended", "Archived" }
+                                : new String[] { "Active", "Inactive", "Suspended" };
+                JComboBox<String> statusBox = new JComboBox<>(statusOptions);
 
                 if (member instanceof FacultyMember) {
                         typeBox.setSelectedItem("Faculty");
@@ -1053,10 +1055,10 @@ public class MembersPanel extends JPanel {
 
                 boolean confirmation = RoundedComponents.showWarningDialog(
                                 this,
-                                "Archive member?",
-                                "Archive \"" + memberName
-                                                + "\"? Their borrowing history will be retained.",
-                                "Archive Member");
+                                "Delete member?",
+                                "Delete \"" + memberName
+                                                + "\"? Members with loan history cannot be deleted.",
+                                "Delete Member");
 
                 if (!confirmation) {
                         return;
@@ -1064,14 +1066,14 @@ public class MembersPanel extends JPanel {
 
                 try {
 
-                        library.archiveMember(memberId);
+                        library.deleteMember(memberId);
 
                         refreshTable();
 
                         RoundedComponents.showMessageDialog(
                                         this,
-                                        "Member archived",
-                                        "Member archived; their history has been retained.",
+                                        "Member deleted",
+                                        "Member deleted successfully.",
                                         RoundedComponents.DialogType.SUCCESS);
 
                 } catch (IllegalArgumentException | IllegalStateException exception) {

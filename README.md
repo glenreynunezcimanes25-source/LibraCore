@@ -21,7 +21,7 @@ The application uses Java object serialization for local data persistence, allow
 - View registered books.
 - Search books by ISBN, title, or author.
 - Edit existing book information.
-- Archive books while preserving borrowing history.
+- Delete books that have no borrowing history.
 - Filter by category and availability; sort table columns.
 - Track total, available, and borrowed copies.
 - Prevent duplicate ISBN entries.
@@ -32,7 +32,7 @@ The application uses Java object serialization for local data persistence, allow
 - View and search member records.
 - Update member information.
 - Set Active, Inactive, or Suspended status.
-- Archive members while preserving borrowing history.
+- Delete members that have no borrowing history.
 - View a member's borrowing history and outstanding fines.
 - Apply different borrowing limits and loan periods based on membership type.
 

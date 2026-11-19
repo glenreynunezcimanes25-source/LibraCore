@@ -51,7 +51,7 @@ public class BooksPanel extends JPanel {
     private JComboBox<String> categoryFilter;
     private JComboBox<String> availabilityFilter;
     private JButton editBookButton;
-    private JButton archiveBookButton;
+    private JButton deleteBookButton;
     private boolean updatingFilters;
 
     private JLabel totalBooksValue;
@@ -191,7 +191,7 @@ public class BooksPanel extends JPanel {
         filters.setOpaque(false);
         categoryFilter = new JComboBox<>(new String[] { "All categories" });
         availabilityFilter = new JComboBox<>(
-                new String[] { "All books", "Available", "Unavailable", "Archived" });
+                new String[] { "All books", "Available", "Unavailable" });
         RoundedComponents.styleComboBox(
                 categoryFilter, new Dimension(160, 40));
         RoundedComponents.styleComboBox(
@@ -290,15 +290,15 @@ public class BooksPanel extends JPanel {
         editBookButton = createButton(
                 "Edit Selected", "save.png", GREEN, WHITE);
 
-        archiveBookButton = createButton(
-                "Archive Selected", "delete.png",
+        deleteBookButton = createButton(
+                "Delete Selected", "delete.png",
                 new Color(198, 91, 88), WHITE);
-        archiveBookButton.setPreferredSize(new Dimension(155, 40));
+        deleteBookButton.setPreferredSize(new Dimension(155, 40));
         editBookButton.setEnabled(false);
-        archiveBookButton.setEnabled(false);
+        deleteBookButton.setEnabled(false);
 
         editBookButton.addActionListener(event -> editBook());
-        archiveBookButton.addActionListener(event -> archiveBook());
+        deleteBookButton.addActionListener(event -> deleteBook());
         bookTable.getSelectionModel().addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
                 updateBookActionButtons();
@@ -306,7 +306,7 @@ public class BooksPanel extends JPanel {
         });
 
         bottomPanel.add(editBookButton);
-        bottomPanel.add(archiveBookButton);
+        bottomPanel.add(deleteBookButton);
 
         tablePanel.add(bottomPanel, BorderLayout.SOUTH);
 
@@ -404,7 +404,7 @@ public class BooksPanel extends JPanel {
     private void updateBookActionButtons() {
         boolean hasSelection = bookTable.getSelectedRow() >= 0;
         editBookButton.setEnabled(hasSelection);
-        archiveBookButton.setEnabled(hasSelection);
+        deleteBookButton.setEnabled(hasSelection);
     }
 
     private void refreshCategoryOptions(ArrayList<Book> books) {
@@ -444,12 +444,6 @@ public class BooksPanel extends JPanel {
         String availability = availabilityFilter.getSelectedItem() == null
                 ? "All books"
                 : availabilityFilter.getSelectedItem().toString();
-        if ("Archived".equals(availability)) {
-            return book.isArchived();
-        }
-        if (book.isArchived()) {
-            return false;
-        }
         if ("Available".equals(availability)) {
             return book.isAvailable();
         }
@@ -491,9 +485,7 @@ public class BooksPanel extends JPanel {
 
     private void addBookRow(Book book) {
 
-        String status = book.isArchived()
-                ? "Archived"
-                : book.getAvailableCopies() > 0
+        String status = book.getAvailableCopies() > 0
                         ? "Available"
                         : "Unavailable";
 
@@ -641,12 +633,12 @@ public class BooksPanel extends JPanel {
         }
     }
 
-    private void archiveBook() {
+    private void deleteBook() {
 
         int selectedRow = bookTable.getSelectedRow();
 
         if (selectedRow == -1) {
-            showError("Please select a book to archive.");
+            showError("Please select a book to delete.");
             return;
         }
 
@@ -661,10 +653,10 @@ public class BooksPanel extends JPanel {
 
         boolean confirmation = RoundedComponents.showWarningDialog(
                 this,
-                "Archive book?",
-                "Archive \"" + title
-                        + "\"? Its loan history will be retained.",
-                "Archive Book");
+                "Delete book?",
+                "Delete \"" + title
+                        + "\"? Books with loan history cannot be deleted.",
+                "Delete Book");
 
         if (!confirmation) {
             return;
@@ -672,14 +664,14 @@ public class BooksPanel extends JPanel {
 
         try {
 
-            library.archiveBook(isbn);
+            library.deleteBook(isbn);
 
             refreshTable();
 
             RoundedComponents.showMessageDialog(
                     this,
-                    "Book archived",
-                    "Book archived; its history has been retained.",
+                    "Book deleted",
+                    "Book deleted successfully.",
                     RoundedComponents.DialogType.SUCCESS);
 
         } catch (IllegalArgumentException | IllegalStateException exception) {
