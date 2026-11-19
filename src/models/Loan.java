@@ -17,6 +17,8 @@ public class Loan implements Serializable {
     private LocalDate returnDate;
 
     private boolean returned;
+    private boolean fineAssessed;
+    private double assessedFine;
 
     public Loan(String loanId, String memberId, String bookIsbn,
             LocalDate borrowDate, LocalDate dueDate) {
@@ -61,14 +63,29 @@ public class Loan implements Serializable {
         return returned;
     }
 
+    public double getAssessedFine() {
+        return assessedFine;
+    }
+
+    public boolean hasAssessedFine() {
+        return fineAssessed;
+    }
+
     public boolean isOverdue() {
+        if (dueDate == null) {
+            return false;
+        }
         LocalDate referenceDate = (returnDate != null) ? returnDate : LocalDate.now();
         return referenceDate.isAfter(dueDate);
     }
 
     public double calculateFine(double finePerDay) {
-        if (finePerDay < 0) {
+        if (!Double.isFinite(finePerDay) || finePerDay < 0) {
             throw new IllegalArgumentException("Fine per day cannot be negative.");
+        }
+
+        if (returned && fineAssessed) {
+            return assessedFine;
         }
 
         if (!isOverdue()) {
@@ -82,11 +99,36 @@ public class Loan implements Serializable {
 
     public void returnBook() {
         if (this.returned) {
-            return;
+            throw new IllegalStateException("This loan has already been returned.");
         }
-
         this.returnDate = LocalDate.now();
         this.returned = true;
+        this.fineAssessed = false;
+    }
+
+    public void returnBook(LocalDate date, double fineAmount) {
+        if (this.returned) {
+            throw new IllegalStateException("This loan has already been returned.");
+        }
+        if (date == null || date.isBefore(borrowDate)) {
+            throw new IllegalArgumentException(
+                    "Return date cannot be before the borrow date.");
+        }
+        if (!Double.isFinite(fineAmount) || fineAmount < 0.0) {
+            throw new IllegalArgumentException("Fine amount cannot be negative.");
+        }
+
+        this.returnDate = date;
+        this.assessedFine = fineAmount;
+        this.fineAssessed = true;
+        this.returned = true;
+    }
+
+    public void restoreActiveState() {
+        this.returnDate = null;
+        this.assessedFine = 0.0;
+        this.fineAssessed = false;
+        this.returned = false;
     }
 
     public void setReturnDate(LocalDate returnDate) {
@@ -94,12 +136,14 @@ public class Loan implements Serializable {
             throw new IllegalArgumentException("Return date cannot be null.");
         }
 
-        if (borrowDate != null && returnDate.isBefore(borrowDate)) {
+        if (returnDate.isBefore(borrowDate)) {
             throw new IllegalArgumentException("Return date cannot be before borrow date.");
         }
 
         this.returnDate = returnDate;
         this.returned = true;
+        this.fineAssessed = false;
+        this.assessedFine = 0.0;
     }
 
     // Setters
@@ -132,8 +176,15 @@ public class Loan implements Serializable {
         if (borrowDate == null) {
             throw new IllegalArgumentException("Borrow date cannot be null.");
         }
+        if ((dueDate != null && dueDate.isBefore(borrowDate))
+                || (returnDate != null && returnDate.isBefore(borrowDate))) {
+            throw new IllegalArgumentException(
+                    "Borrow date cannot be after the due or return date.");
+        }
 
         this.borrowDate = borrowDate;
+        this.fineAssessed = false;
+        this.assessedFine = 0.0;
     }
 
     public void setDueDate(LocalDate dueDate) {
@@ -147,5 +198,7 @@ public class Loan implements Serializable {
         }
 
         this.dueDate = dueDate;
+        this.fineAssessed = false;
+        this.assessedFine = 0.0;
     }
 }

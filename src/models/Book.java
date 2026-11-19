@@ -12,6 +12,7 @@ public class Book implements Serializable {
 
     private int totalCopies;
     private int availableCopies;
+    private boolean archived;
 
     // Constructor
     public Book(String isbn, String title, String author, String category, int totalCopies, int availableCopies) {
@@ -57,6 +58,14 @@ public class Book implements Serializable {
         return availableCopies;
     }
 
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
     // Setters
     public void setIsbn(String isbn) {
         this.isbn = requireText(isbn, "ISBN");
@@ -94,6 +103,9 @@ public class Book implements Serializable {
     }
 
     public void borrowCopy() {
+        if (archived) {
+            throw new IllegalStateException("Archived books cannot be borrowed.");
+        }
         if (!isAvailable()) {
             throw new IllegalArgumentException("No copies available to borrow");
         }
@@ -102,9 +114,11 @@ public class Book implements Serializable {
     }
 
     public void returnCopy() {
-        if (availableCopies < totalCopies) {
-            availableCopies++;
+        if (availableCopies >= totalCopies) {
+            throw new IllegalStateException(
+                    "Available copies cannot exceed total copies.");
         }
+        availableCopies++;
     }
 
     private static String requireText(String value, String fieldName) {

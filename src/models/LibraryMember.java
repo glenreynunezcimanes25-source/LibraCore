@@ -1,6 +1,8 @@
 package models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+
 import interfaces.BorrowingPolicy;
 
 public abstract class LibraryMember implements BorrowingPolicy, Serializable {
@@ -9,6 +11,9 @@ public abstract class LibraryMember implements BorrowingPolicy, Serializable {
     private String memberId;
     private String fullname;
     private String contactNumber;
+    // Object allows snapshots written with either historical enum type to load.
+    private Object status = MemberStatus.ACTIVE;
+    private LocalDate registrationDate = LocalDate.now();
 
     public LibraryMember(String memberId, String fullname, String contactNumber) {
         this.memberId = requireText(memberId, "Member ID");
@@ -26,6 +31,29 @@ public abstract class LibraryMember implements BorrowingPolicy, Serializable {
 
     public String getContactNumber() {
         return contactNumber;
+    }
+
+    public LocalDate getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public MemberStatus getStatus() {
+        // Older serialized members have no status field and default to null.
+        if (!(status instanceof Enum<?>)) {
+            return MemberStatus.ACTIVE;
+        }
+        return MemberStatus.valueOf(((Enum<?>) status).name());
+    }
+
+    public void setStatus(MemberStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("Member status cannot be null.");
+        }
+        this.status = status;
+    }
+
+    public boolean canBorrow() {
+        return getStatus() == MemberStatus.ACTIVE;
     }
 
     public void setMemberId(String memberId) {
@@ -47,4 +75,12 @@ public abstract class LibraryMember implements BorrowingPolicy, Serializable {
         }
         return value.trim();
     }
+
+    public enum MemberStatus {
+        ACTIVE,
+        INACTIVE,
+        SUSPENDED,
+        ARCHIVED
+    }
+
 }
