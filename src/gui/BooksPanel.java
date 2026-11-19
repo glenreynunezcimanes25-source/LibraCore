@@ -261,6 +261,7 @@ public class BooksPanel extends JPanel {
                 new Color(232, 222, 198));
         bookTable.setSelectionForeground(DARK);
         bookTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        RoundedComponents.enableCellCopy(bookTable);
         bookTable.setAutoCreateRowSorter(true);
         RoundedComponents.configureTableSorter(bookTable);
 

@@ -51,8 +51,8 @@ import javax.swing.table.TableCellRenderer;
 import gui.RoundedComponents.RoundedPanel;
 import models.FacultyMember;
 import models.LibraryMember;
-import models.Loan;
 import models.LibraryMember.MemberStatus;
+import models.Loan;
 import models.StudentMember;
 import services.LibraryService;
 
@@ -303,6 +303,7 @@ public class MembersPanel extends JPanel {
                                 new Color(218, 234, 224));
                 memberTable.setSelectionForeground(DARK);
                 memberTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                RoundedComponents.enableCellCopy(memberTable);
                 memberTable.setFillsViewportHeight(true);
                 memberTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
                 memberTable.setDefaultRenderer(
@@ -1129,6 +1130,7 @@ public class MembersPanel extends JPanel {
                 }
 
                 JTable historyTable = new JTable(historyModel);
+                RoundedComponents.enableCellCopy(historyTable);
                 historyTable.setAutoCreateRowSorter(true);
                 RoundedComponents.configureTableSorter(historyTable);
                 historyTable.setFillsViewportHeight(true);

@@ -21,6 +21,8 @@ import models.FinePayment;
 import models.LibraryData;
 import models.LibraryMember;
 import models.Loan;
+import models.StudentMember;
+import models.FacultyMember;
 import models.LibraryMember.MemberStatus;
 
 public class LibraryService {

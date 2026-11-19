@@ -247,6 +247,7 @@ public class BorrowReturnPanel extends JPanel {
         RoundedComponents.configureTableSorter(loanTable);
         loanTable.setFillsViewportHeight(true);
         loanTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        RoundedComponents.enableCellCopy(loanTable);
 
         loanTable.setSelectionBackground(
                 new Color(232, 222, 198));

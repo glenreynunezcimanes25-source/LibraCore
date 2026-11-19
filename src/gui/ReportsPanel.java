@@ -515,6 +515,7 @@ public class ReportsPanel extends JPanel {
                         DefaultTableModel model) {
 
                 JTable table = new JTable(model);
+                RoundedComponents.enableCellCopy(table);
 
                 table.setFont(
                                 new Font("Arial", Font.PLAIN, 12));

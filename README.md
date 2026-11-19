@@ -66,7 +66,7 @@ The application uses Java object serialization for local data persistence, allow
   files; those files are left untouched when the new snapshot is created.
 - Loads previously saved records when the application starts.
 - Creates the data directory when needed.
-- Starts with an empty library when no saved records exist.
+- Loads books, members, loans, and fine payments from the local `data/library.dat` snapshot.
 - Reports unreadable/incompatible data without replacing it with empty records.
 
 ### 7. User Interface
@@ -143,7 +143,7 @@ Libracore/
 │   └── icons/
 │
 ├── test/
-│   └── LibraryServiceTest.java
+│   
 │
 ├── data/
 │
@@ -213,9 +213,10 @@ snapshot is preserved as `library.dat.corrupt-<timestamp>` and the backup is
 never deleted. If no valid backup exists, restore a known-good copy manually
 before restarting.
 
-When the application is launched for the first time, it starts with an empty library if no saved records exist.
-
-**Note:** The application does not automatically generate sample books, members, or borrowing transactions.
+The `data/library.dat` in this workspace contains 16 sample books, 15 student
+and faculty members, 18 loans with varied due dates, and 5 fine payments for
+trying the application. When the app starts with no saved data, it starts with
+an empty library.
 
 Keep the `resources` folder alongside the compiled application directories so the icons can be loaded at runtime.
 

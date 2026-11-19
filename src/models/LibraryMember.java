@@ -7,11 +7,19 @@ import interfaces.BorrowingPolicy;
 
 public abstract class LibraryMember implements BorrowingPolicy, Serializable {
 
+    public enum MemberStatus {
+        ACTIVE,
+        INACTIVE,
+        SUSPENDED,
+        ARCHIVED,
+        Single
+    }
+
     private static final long serialVersionUID = 1L;
     private String memberId;
     private String fullname;
     private String contactNumber;
-    // Object allows snapshots written with either historical enum type to load.
+    // Object keeps older serialized enum values readable after enum moves.
     private Object status = MemberStatus.ACTIVE;
     private LocalDate registrationDate = LocalDate.now();
 
@@ -75,12 +83,4 @@ public abstract class LibraryMember implements BorrowingPolicy, Serializable {
         }
         return value.trim();
     }
-
-    public enum MemberStatus {
-        ACTIVE,
-        INACTIVE,
-        SUSPENDED,
-        ARCHIVED
-    }
-
 }

@@ -788,6 +788,7 @@ public class DashboardPanel extends JPanel {
         }
 
         JTable table = new JTable(model);
+        RoundedComponents.enableCellCopy(table);
         table.setFont(new Font("Arial", Font.PLAIN, 11));
         table.setRowHeight(40);
         table.setForeground(DARK);

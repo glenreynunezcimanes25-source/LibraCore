@@ -12,12 +12,17 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.time.format.DateTimeParseException;
 import java.time.LocalDate;
 import java.util.Collections;
 
 import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -31,6 +36,8 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -332,6 +339,51 @@ public final class RoundedComponents {
                                         table.convertColumnIndexToModel(column),
                                         RoundedComponents::compareSortValues);
                 }
+        }
+
+        /** Enables copying the selected table cell with Ctrl+C. */
+        public static void enableCellCopy(JTable table) {
+                table.setCellSelectionEnabled(true);
+                table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                table.setToolTipText("Select a cell and press Ctrl+C to copy its value.");
+
+                String actionName = "copySelectedCellToClipboard";
+                table.getInputMap(JComponent.WHEN_FOCUSED).put(
+                                KeyStroke.getKeyStroke(
+                                                KeyEvent.VK_C,
+                                                InputEvent.CTRL_DOWN_MASK),
+                                actionName);
+                table.getActionMap().put(actionName, new AbstractAction() {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public void actionPerformed(
+                                        java.awt.event.ActionEvent event) {
+                                int row = table.getSelectedRow();
+                                int column = table.getSelectedColumn();
+                                if (row < 0 || column < 0) {
+                                        return;
+                                }
+
+                                Object value = table.getValueAt(row, column);
+                                if (value == null) {
+                                        return;
+                                }
+
+                                try {
+                                        Toolkit.getDefaultToolkit()
+                                                        .getSystemClipboard()
+                                                        .setContents(
+                                                                        new StringSelection(
+                                                                                        value.toString()),
+                                                                        null);
+                                } catch (IllegalStateException
+                                                | java.awt.HeadlessException exception) {
+                                        // Clipboard access may be unavailable in a headless
+                                        // environment or while another app holds it.
+                                }
+                        }
+                });
         }
 
         private static int compareSortValues(Object first, Object second) {
