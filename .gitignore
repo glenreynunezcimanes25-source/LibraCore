@@ -4,8 +4,6 @@
 *.vs
 *bin/
 # Older build output path; the project now uses bin/.
-/out/
-*.png
 
 # Log file
 *.log

@@ -11,8 +11,7 @@ public abstract class LibraryMember implements BorrowingPolicy, Serializable {
         ACTIVE,
         INACTIVE,
         SUSPENDED,
-        ARCHIVED,
-        Single
+        ARCHIVED
     }
 
     private static final long serialVersionUID = 1L;

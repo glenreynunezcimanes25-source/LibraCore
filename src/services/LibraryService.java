@@ -21,8 +21,6 @@ import models.FinePayment;
 import models.LibraryData;
 import models.LibraryMember;
 import models.Loan;
-import models.StudentMember;
-import models.FacultyMember;
 import models.LibraryMember.MemberStatus;
 
 public class LibraryService {
@@ -33,8 +31,7 @@ public class LibraryService {
     private ArrayList<FinePayment> payments;
 
     private LibraryFileManager fileManager;
-    private final PropertyChangeSupport changeSupport =
-            new PropertyChangeSupport(this);
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public LibraryService() {
 
@@ -814,8 +811,7 @@ public class LibraryService {
                                 + " has invalid borrow or due dates.");
             }
 
-            if (loan.isReturned()
-                    != (loan.getReturnDate() != null)) {
+            if (loan.isReturned() != (loan.getReturnDate() != null)) {
                 issues.add(
                         "Loan " + loan.getLoanId()
                                 + " has inconsistent return status and date.");

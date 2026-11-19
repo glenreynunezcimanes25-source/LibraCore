@@ -142,15 +142,15 @@ Libracore/
 ├── resources/
 │   └── icons/
 │
-├── test/
-│   
-│
 ├── data/
 │
 ├── bin/
 │
-└── README.md
+├── README.md
+└── UML.md
 ```
+
+See [UML.md](UML.md) for the class diagram and a note on how the stored IDs connect loan, book, member, and payment records.
 
 ---
 
@@ -219,21 +219,6 @@ trying the application. When the app starts with no saved data, it starts with
 an empty library.
 
 Keep the `resources` folder alongside the compiled application directories so the icons can be loaded at runtime.
-
-## Running the Tests
-
-The project includes isolated service and GUI-panel smoke tests. They use
-temporary data directories and do not read or modify the application's `data`
-directory:
-
-```powershell
-javac -d bin (Get-ChildItem -Path src,test -Recurse -Filter *.java | Select-Object -ExpandProperty FullName)
-java -ea -cp bin LibraryServiceTest
-```
-
-The tests cover legacy loading, snapshot backups, preservation of corrupt
-snapshots, borrowing and returning, fine payments, failed-save rollback,
-archival rules, and headless GUI panel initialization.
 
 ---
 
