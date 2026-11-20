@@ -60,13 +60,13 @@ The application uses Java object serialization for local data persistence, allow
 ### 6. Data Persistence
 - Uses Java object serialization.
 - Saves books, members, loans, and fine payments locally.
-- Saves all records as one versioned snapshot to avoid partial multi-file updates.
-- Keeps the prior snapshot as `library.dat.bak` before replacing it.
-- Continues to read the original `books.dat`, `members.dat`, and `loans.dat`
-  files; those files are left untouched when the new snapshot is created.
+- Saves books, members, loans, and fine payments in separate serialized files.
+- Keeps the previous version of each file as a matching `.bak` file.
+- Reads the earlier combined `library.dat` snapshot and switches to separate
+  files on the first successful save.
 - Loads previously saved records when the application starts.
 - Creates the data directory when needed.
-- Loads books, members, loans, and fine payments from the local `data/library.dat` snapshot.
+- Loads books, members, loans, and fine payments from their local data files.
 - Reports unreadable/incompatible data without replacing it with empty records.
 
 ### 7. User Interface
@@ -194,29 +194,33 @@ The entry point is `Main` in the default package.
 
 Libracore stores its records locally using Java serialization.
 
-The active data snapshot is:
+The active data files are:
 
-- `library.dat` – Versioned snapshot of books, members, loans, and fine
-  payments.
-- `library.dat.bak` – Previous snapshot, retained as a recovery copy.
+- `books.dat` – Book records.
+- `members.dat` – Member records.
+- `loans.dat` – Loan records.
+- `payments.dat` – Fine payment records.
+- Each file has a matching `.bak` recovery copy after its first update.
 
-The snapshot is stored inside the `data` directory. Existing installations
-using `books.dat`, `members.dat`, and `loans.dat` are loaded as legacy data.
-Those source files are not deleted or overwritten; the first successful save
-creates `library.dat`. Subsequent saves write a temporary snapshot and replace
-the current snapshot, retaining the previous one as `library.dat.bak`.
+These files are stored inside the `data` directory. Existing installations
+using the combined `library.dat` snapshot continue to load it; the first
+successful save creates the separate files. Existing separate `books.dat`,
+`members.dat`, and `loans.dat` files are also supported. Updates replace each
+file atomically and retain that file's previous contents in its `.bak` copy.
+Each file replacement is atomic, while a save across all four files is not a
+single transaction.
 
-If data cannot be read, preserve the affected file and backup. Libracore reports
-the problem instead of silently starting with empty records. At startup, you
-can explicitly choose to restore the validated previous snapshot. The damaged
-snapshot is preserved as `library.dat.corrupt-<timestamp>` and the backup is
-never deleted. If no valid backup exists, restore a known-good copy manually
+If data cannot be read, preserve the affected file and its backup. Libracore
+reports the problem instead of silently starting with empty records. At
+startup, you can explicitly choose to restore the validated previous data.
+For a damaged combined snapshot, the file is preserved as
+`library.dat.corrupt-<timestamp>` and the backup is never deleted. If no valid
+backup exists, restore a known-good copy manually
 before restarting.
 
-The `data/library.dat` in this workspace contains 16 sample books, 15 student
-and faculty members, 18 loans with varied due dates, and 5 fine payments for
-trying the application. When the app starts with no saved data, it starts with
-an empty library.
+The combined `data/library.dat` in this workspace is retained as a migration
+source and contains sample data. When the app starts with no saved data, it
+starts with an empty library.
 
 Keep the `resources` folder alongside the compiled application directories so the icons can be loaded at runtime.
 

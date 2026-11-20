@@ -73,10 +73,8 @@ public class LibraryFileManager {
                 dataDirectory, "library-", ".tmp");
 
         try {
-            try (FileOutputStream fileOutput =
-                    new FileOutputStream(temporary.toFile());
-                    ObjectOutputStream output =
-                            new ObjectOutputStream(fileOutput)) {
+            try (FileOutputStream fileOutput = new FileOutputStream(temporary.toFile());
+                    ObjectOutputStream output = new ObjectOutputStream(fileOutput)) {
                 output.writeObject(libraryData);
                 output.flush();
                 fileOutput.getChannel().force(true);
